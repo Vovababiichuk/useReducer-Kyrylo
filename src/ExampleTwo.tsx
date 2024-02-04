@@ -1,14 +1,20 @@
 import { useReducer } from 'react'
 import { Link } from 'react-router-dom'
 
+interface ListActionWithPayload {
+	type: 'add' | 'delete' | 'select'
+	payload: string | number
+}
+
+interface ListActionWithoutPayload {
+	type: 'reverse'
+}
+
+type ListAction = ListActionWithPayload | ListActionWithoutPayload
+
 interface ListItem {
 	value: string
 	id: number
-}
-
-interface ListAction {
-	type: string
-	payload: string | number
 }
 
 // константа LISTACTION_TYP буде мати типи дій
@@ -16,6 +22,7 @@ const LIST_ACTION_TYPE = {
 	ADD: 'add',
 	DELETE: 'delete',
 	SELECT: 'select',
+	REVERSE: 'reverse',
 } as const
 
 // listReducer - повертає новий обьект стану
@@ -33,9 +40,9 @@ const listReducer = (
 				...state,
 				items: [...state.items, newItem],
 			}
-    }
+		}
 
-    case LIST_ACTION_TYPE.DELETE: {
+		case LIST_ACTION_TYPE.DELETE: {
 			// фільтруєм по ідентифікатору
 			const newItems = state.items.filter(item => item.id !== action.payload)
 
@@ -43,9 +50,9 @@ const listReducer = (
 				...state,
 				items: newItems,
 			}
-    }
+		}
 
-    case LIST_ACTION_TYPE.SELECT: {
+		case LIST_ACTION_TYPE.SELECT: {
 			return {
 				...state,
 				selectedId:
@@ -53,7 +60,15 @@ const listReducer = (
 						? null
 						: (action.payload as number),
 			}
-    }
+		}
+
+		case LIST_ACTION_TYPE.REVERSE: {
+      const newItems = [...state.items].reverse()
+			return {
+				...state,
+        items: newItems,
+			}
+		}
 
 		default:
 			return { ...state }
@@ -77,7 +92,10 @@ export const ExampleTwo = () => {
 		e.target.value = ''
 	}
 
-	const handleRemoveItem = (id: number, e: React.MouseEvent<HTMLButtonElement> ) => {
+	const handleRemoveItem = (
+		id: number,
+		e: React.MouseEvent<HTMLButtonElement>
+	) => {
 		e.stopPropagation()
 		dispatch({ type: LIST_ACTION_TYPE.DELETE, payload: id })
 	}
@@ -85,6 +103,12 @@ export const ExampleTwo = () => {
 	const handleSelectItem = (id: number) => {
 		dispatch({ type: LIST_ACTION_TYPE.SELECT, payload: id })
 	}
+
+	const handleReverseItems = () => {
+		dispatch({ type: LIST_ACTION_TYPE.REVERSE })
+	}
+
+  console.log(state)
 
 	return (
 		<div>
@@ -104,7 +128,7 @@ export const ExampleTwo = () => {
 								<span className='mr-2'>{value}</span>
 							</div>
 							<button
-								onClick={(e) => handleRemoveItem(id, e)}
+								onClick={e => handleRemoveItem(id, e)}
 								className='text-red-500'
 							>
 								Remove
@@ -120,6 +144,9 @@ export const ExampleTwo = () => {
 					placeholder='Add new element...'
 					className='px-2 py-1'
 				/>
+			</div>
+			<div>
+				<button onClick={handleReverseItems}>Reverse</button>
 			</div>
 		</div>
 	)
