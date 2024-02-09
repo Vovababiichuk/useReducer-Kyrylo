@@ -63,10 +63,10 @@ const listReducer = (
 		}
 
 		case LIST_ACTION_TYPE.REVERSE: {
-      const newItems = [...state.items].reverse()
+			const newItems = [...state.items].reverse()
 			return {
 				...state,
-        items: newItems,
+				items: newItems,
 			}
 		}
 
@@ -75,12 +75,23 @@ const listReducer = (
 	}
 }
 
+const initState = { items: [], selectedId: null }
+
 export const ExampleTwo = () => {
+	// init - наповнює якимись стартовими даними, може з сервера.... Через init ми можемо задати стартові дані без переписання (в функцію) в нашому випадку initState. Це буде локально привязано до відповідного компонента.
+	const init = (state: typeof initState) => {
+		if (state.items && state.items.length === 0) {
+			return {
+				...state,
+				items: [{ id: 432312, value: 'first item' }],
+			}
+		} else {
+			return state
+		}
+	}
+
 	console.log('render')
-	const [state, dispatch] = useReducer(listReducer, {
-		items: [],
-		selectedId: null,
-	})
+	const [state, dispatch] = useReducer(listReducer, initState, init)
 
 	const handleAddItem = (e: React.FocusEvent<HTMLInputElement>) => {
 		const { value } = e.target
@@ -108,7 +119,7 @@ export const ExampleTwo = () => {
 		dispatch({ type: LIST_ACTION_TYPE.REVERSE })
 	}
 
-  console.log(state)
+	console.log(state)
 
 	return (
 		<div>
